@@ -7,6 +7,7 @@ import { financeSchedule } from "@/lib/finance/schedule";
 import { formatMonthDay, todayInTaipei } from "@/lib/dates";
 import { listTickets } from "@/lib/tickets/data";
 import { turnFor } from "@/lib/tickets/turn";
+import { ticketLabel } from "@/lib/tickets/flow";
 import { mergedPrs } from "@/lib/tickets/github";
 import TopBar from "@/components/top-bar";
 import DateBadge from "@/components/date-badge";
@@ -79,7 +80,7 @@ export default async function HomePage() {
               return (
                 <Link key={t.id} href={`/tickets?t=${t.number}`} className="card show-row">
                   <span className="show-row-main">
-                    <span className="show-row-name"><span className="tk-no">T-{t.number}</span> {t.title}</span>
+                    <span className="show-row-name"><span className="tk-no">{ticketLabel(t.number)}</span> {t.title}</span>
                     <span className="meta">
                       {turn === "review" ? <span className="due soon">等你驗收</span> : pr ? <span className="due soon">PR #{pr.number} 已合併，部署後按交付</span> : <span>你認領、開發中</span>}
                     </span>

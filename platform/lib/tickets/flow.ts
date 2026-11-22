@@ -36,6 +36,13 @@ export const CATEGORIES = Object.keys(CATEGORY_LABEL) as TicketCategory[];
 export const ACTIVE_STATUSES: readonly TicketStatus[] = ["open", "in_progress", "review"];
 export const TITLE_MAX = 120;
 
+/** 票號前綴。2026-11-22 從 T- 改成 J-（change ticket-prefix-j）：公司 Jebby Dashboard 的任務懸賞也叫 T-n，兩邊同時在用會認錯票。 */
+export const TICKET_PREFIX = "J-";
+/** 畫面、訊息、開工指令裡的票號：J-20。 */
+export function ticketLabel(n: number): string {
+  return `${TICKET_PREFIX}${n}`;
+}
+
 /** 新票描述預填的四段（spec「Description template」）。 */
 export const DESCRIPTION_TEMPLATE = "現在怎樣：\n\n希望變成：\n\n做完看得到什麼（驗收）：\n\n誰會用、誰看得到：\n";
 

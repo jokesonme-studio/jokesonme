@@ -1,4 +1,4 @@
-// 讀 GitHub 上已合併的 PR，用標題裡的 (T-n) 對回票（change ticket-turn-hints；spec dev-tickets「Merged PR hint」）。
+// 讀 GitHub 上已合併的 PR，用標題裡的 (J-n)（改名前是 (T-n)）對回票（change ticket-turn-hints；spec dev-tickets「Merged PR hint」）。
 // repo 是公開的，不帶金鑰。只是提示用：讀不到（逾時、被限流）就當作沒有，絕不讓頁面壞掉。
 import { mergedPrByTicket, type MergedPr } from "./turn.ts";
 
