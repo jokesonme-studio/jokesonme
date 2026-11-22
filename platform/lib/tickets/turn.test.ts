@@ -36,9 +36,11 @@ test("待處理、已完成、不做都不輪到任何人；財務夥伴永遠�
 });
 
 test("PR 標題取票號", () => {
-  assert.equal(ticketNumberFromPrTitle("fix(T-20): 平台新增工具箱頁"), 20);
+  assert.equal(ticketNumberFromPrTitle("fix(J-22): 票號改成 J"), 22);
+  assert.equal(ticketNumberFromPrTitle("fix(T-20): 平台新增工具箱頁"), 20); // 改名前的 PR 標題
   assert.equal(ticketNumberFromPrTitle("feat(T-21): 現場投票"), 21);
-  assert.equal(ticketNumberFromPrTitle("chore: 封存 T-20 的提案"), null);
+  assert.equal(ticketNumberFromPrTitle("chore: 封存 J-20 的提案"), null);
+  assert.equal(ticketNumberFromPrTitle("fix(X-20): 別的系統"), null);
   assert.equal(ticketNumberFromPrTitle("fix: 外掛安裝說明"), null);
 });
 

@@ -18,9 +18,9 @@ export function turnFor(t: TicketState, me: { id: string; role: Role | null }): 
   return t.reporterId === me.id ? "review" : null;
 }
 
-/** PR 標題裡的票號：`fix(T-20): …` → 20；沒有就回 null。 */
+/** PR 標題裡的票號：`fix(J-22): …` → 22；沒有就回 null。改名前的 PR 標題是 `(T-n)`，GitHub 上改不了，所以兩種都認。 */
 export function ticketNumberFromPrTitle(title: string): number | null {
-  const m = /\(T-(\d+)\)/.exec(title);
+  const m = /\([JT]-(\d+)\)/.exec(title);
   return m ? Number(m[1]) : null;
 }
 

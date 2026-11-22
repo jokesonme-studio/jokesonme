@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { actOnTicket, createTicket, type TicketResult } from "@/app/(app)/tickets/actions";
-import { ACTION_LABEL, CATEGORIES, CATEGORY_LABEL, DESCRIPTION_TEMPLATE, STATUS_LABEL, TITLE_MAX, type TicketAction } from "@/lib/tickets/flow";
+import { ACTION_LABEL, CATEGORIES, CATEGORY_LABEL, DESCRIPTION_TEMPLATE, STATUS_LABEL, ticketLabel, TITLE_MAX, type TicketAction } from "@/lib/tickets/flow";
 import type { TicketEvent, TicketView } from "@/lib/tickets/data";
 import { formatTaipeiDateTime } from "@/lib/dates";
 import { IconPlus } from "@/components/icons";
@@ -42,7 +42,7 @@ export default function TicketBoard(props: {
           <Link key={t.id} className="card row tk-card" href={withT(props.listHref, t.number)} scroll={false}>
             <span className="row-main">
               <span className="title">
-                <span className="tk-no">T-{t.number}</span> {t.title}
+                <span className="tk-no">{ticketLabel(t.number)}</span> {t.title}
               </span>
               <span className="meta">
                 <span className={`tag tk-status tk-${t.status}`}>{STATUS_LABEL[t.status]}</span>
@@ -85,7 +85,7 @@ function TicketForm({ ticket, onClose, onDone }: { ticket?: TicketView; onClose:
   return (
     <div className="sheet-backdrop" onClick={onClose}>
       <div className="sheet" role="dialog" aria-modal="true" aria-labelledby="tk-form-title" onClick={(e) => e.stopPropagation()}>
-        <h2 id="tk-form-title">{ticket ? `編輯 T-${ticket.number}` : "開一張票"}</h2>
+        <h2 id="tk-form-title">{ticket ? `編輯 ${ticketLabel(ticket.number)}` : "開一張票"}</h2>
         {error ? <div className="notice bad" role="alert">{error}</div> : null}
         <form
           onSubmit={(e) => {
@@ -184,7 +184,7 @@ function TicketSheet({ detail, name, onClose }: { detail: Detail; name: (id: str
         <div className="meta" style={{ marginTop: 0 }}>
           <span className={`tag tk-status tk-${t.status}`}>{STATUS_LABEL[t.status]}</span>
           <span className="tag">{CATEGORY_LABEL[t.category]}</span>
-          <span>T-{t.number}</span>
+          <span>{ticketLabel(t.number)}</span>
         </div>
         <h2 id="tk-title">{t.title}</h2>
         <p className="tk-people">{name(t.reporterId)} 開的票{t.ownerId ? `・${name(t.ownerId)} 認領` : "・還沒人認領"}</p>

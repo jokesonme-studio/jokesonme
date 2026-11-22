@@ -7,7 +7,7 @@ const ticket = { number: 9, title: "財務頁加匯出按鈕", category: "featur
 const text = kickoffText(ticket, "巧達");
 
 test("spec 情境：開工指令包含票號、標題、規範、分支、PR 標題、交付位置與描述", () => {
-  for (const s of ["T-9", "財務頁加匯出按鈕", "新功能", "巧達", "COLLABORATION.md", "feat/T-9-", "fix(T-9)", "/tickets?t=9", "不要自行合併", ticket.description]) {
+  for (const s of ["看我笑話平台的 J-9", "財務頁加匯出按鈕", "新功能", "巧達", "COLLABORATION.md", "feat/J-9-", "fix(J-9)", "/tickets?t=9", "不要自行合併", ticket.description]) {
     assert.ok(text.includes(s), `缺少：${s}`);
   }
 });
@@ -24,4 +24,8 @@ test("描述空白時提醒先問清楚", () => {
 
 test("開工指令指向的 COLLABORATION.md 真的存在於 repo 根目錄", () => {
   assert.ok(existsSync(new URL("../../../COLLABORATION.md", import.meta.url)), "repo 根目錄缺 COLLABORATION.md");
+});
+
+test("票號一律 J-，不出現公司 Dashboard 用的 T-", () => {
+  assert.doesNotMatch(text, /T-9/);
 });

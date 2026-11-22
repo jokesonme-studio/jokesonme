@@ -5,7 +5,7 @@
 import { db } from "../supabase.ts";
 import type { Role } from "../auth/access.ts";
 import { listUsers, nameMap } from "../todos.ts";
-import { isCategory, planTransition, titleError, type TicketAction } from "./flow.ts";
+import { isCategory, planTransition, ticketLabel, titleError, type TicketAction } from "./flow.ts";
 import { getTicket, getTicketByNumber, type TicketRow, type TicketView } from "./data.ts";
 
 export type Operator = { id: string; role: Role | null };
@@ -53,7 +53,7 @@ export async function actOnTicketAs(
   if (!plan.ok) {
     // 畫面還停在「沒人認領」但其實已被別人認領（spec dev-tickets「Conflict-safe claiming」）：講清楚是誰
     if (act === "claim" && ticket.ownerId && ticket.ownerId !== me.id) {
-      return { ok: false, status: 409, error: `T-${ticket.number} 剛被 ${await ownerName(me, ticket.ownerId)} 認領了，重新整理看看` };
+      return { ok: false, status: 409, error: `${ticketLabel(ticket.number)} 剛被 ${await ownerName(me, ticket.ownerId)} 認領了，重新整理看看` };
     }
     return { ok: false, status: 400, error: plan.reason };
   }
@@ -70,9 +70,9 @@ export async function actOnTicketAs(
   if (!data || !(data as Partial<TicketRow>).id) {
     const now = await getTicket(actor, ticket.id);
     if (act === "claim" && now?.ownerId && now.ownerId !== me.id) {
-      return { ok: false, status: 409, error: `T-${ticket.number} 剛被 ${await ownerName(me, now.ownerId)} 認領了，重新整理看看` };
+      return { ok: false, status: 409, error: `${ticketLabel(ticket.number)} 剛被 ${await ownerName(me, now.ownerId)} 認領了，重新整理看看` };
     }
-    return { ok: false, status: 409, error: `T-${ticket.number} 剛被別人改過，重新整理看看` };
+    return { ok: false, status: 409, error: `${ticketLabel(ticket.number)} 剛被別人改過，重新整理看看` };
   }
   return { ok: true, number: ticket.number, status: (data as TicketRow).status };
 }
