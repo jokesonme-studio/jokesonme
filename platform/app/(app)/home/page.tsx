@@ -5,16 +5,24 @@ import { applyFilter, listTodos } from "@/lib/todos";
 import { countPendingLines } from "@/lib/finance/oen";
 import { financeSchedule } from "@/lib/finance/schedule";
 import { formatMonthDay, todayInTaipei } from "@/lib/dates";
+import { listTickets } from "@/lib/tickets/data";
+import { turnFor } from "@/lib/tickets/turn";
+import { mergedPrs } from "@/lib/tickets/github";
 import TopBar from "@/components/top-bar";
 import DateBadge from "@/components/date-badge";
 import FinanceSchedule from "@/components/finance-schedule";
 import { IconChevron } from "@/components/icons";
 
 // 首頁（2026-11-03 改版）：下一場（與之後幾場）、財務時程、待確認數、我的待辦摘要。待辦清單從這裡的「全部待辦」進。
+// 2026-11-22 加「輪到你的開發票」（spec dev-tickets「My turn list」）：沒有輪到自己的票就不顯示這一區。
 export default async function HomePage() {
   const me = await requirePage("todos", "/home");
   const actor = `user:${me.id}` as const;
-  const [shows, todos, pending] = await Promise.all([listShows(actor), listTodos(actor), countPendingLines(actor).catch(() => 0)]);
+  const [shows, todos, pending, tickets] = await Promise.all([
+    listShows(actor), listTodos(actor), countPendingLines(actor).catch(() => 0), listTickets(actor).catch(() => []),
+  ]);
+  const myTurn = tickets.map((t) => ({ t, turn: turnFor(t, me) })).filter((x) => x.turn !== null).sort((a, b) => a.t.number - b.t.number);
+  const merged = myTurn.some((x) => x.turn === "develop") ? await mergedPrs() : new Map();
   const today = todayInTaipei();
   const { next, upcoming } = pickableShows(shows, today);
   const schedule = financeSchedule(today, shows.map((s) => ({ name: s.name, type: s.type, series: seriesOf(s), performanceDate: s.performanceDate, kind: s.kind })));
@@ -62,6 +70,26 @@ export default async function HomePage() {
           <span className="row-main"><b>待確認 {pending} 筆</b><span className="meta">{pending ? "Oen 明細等待核准入帳" : "沒有待確認的 Oen 明細"}</span></span>
           <IconChevron className="chev" />
         </Link>
+
+        {myTurn.length ? (
+          <section>
+            <div className="section"><h2>輪到你的開發票</h2><Link href="/tickets?mine=1">開發 <IconChevron className="chev" /></Link></div>
+            {myTurn.map(({ t, turn }) => {
+              const pr = turn === "develop" ? merged.get(t.number) : undefined;
+              return (
+                <Link key={t.id} href={`/tickets?t=${t.number}`} className="card show-row">
+                  <span className="show-row-main">
+                    <span className="show-row-name"><span className="tk-no">T-{t.number}</span> {t.title}</span>
+                    <span className="meta">
+                      {turn === "review" ? <span className="due soon">等你驗收</span> : pr ? <span className="due soon">PR #{pr.number} 已合併，部署後按交付</span> : <span>你認領、開發中</span>}
+                    </span>
+                  </span>
+                  <IconChevron className="chev" />
+                </Link>
+              );
+            })}
+          </section>
+        ) : null}
 
         <section>
           <div className="section"><h2>我的待辦</h2><Link href="/todos?f=all">全部待辦 <IconChevron className="chev" /></Link></div>

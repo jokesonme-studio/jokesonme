@@ -4,6 +4,7 @@ import { listUsers, nameMap } from "@/lib/todos";
 import { listTicketEvents, listTickets } from "@/lib/tickets/data";
 import { ACTIVE_STATUSES, allowedActions, nextStep } from "@/lib/tickets/flow";
 import { kickoffText } from "@/lib/tickets/kickoff";
+import { mergedPrs } from "@/lib/tickets/github";
 import TopBar from "@/components/top-bar";
 import TicketBoard from "@/components/ticket-board";
 
@@ -32,12 +33,14 @@ export default async function TicketsPage({ searchParams }: PageProps<"/tickets"
 
   const selected = typeof sp.t === "string" ? tickets.find((t) => t.number === Number(sp.t)) : undefined;
   const meActor = { id: me.id, role: me.role };
+  // 處理中的票才需要知道 PR 合併了沒（spec「Merged PR hint」）
+  const merged = selected?.status === "in_progress" ? (await mergedPrs()).get(selected.number)?.number ?? null : null;
   const detail = selected
     ? {
         ticket: selected,
         events: await listTicketEvents(actor, selected.id),
         actions: allowedActions(selected, meActor),
-        next: nextStep(selected, name),
+        next: nextStep(selected, name, merged),
         kickoff: selected.ownerId === me.id || me.role === "admin" ? kickoffText(selected, name(selected.reporterId)) : null,
       }
     : null;

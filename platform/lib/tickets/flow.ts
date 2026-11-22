@@ -142,13 +142,15 @@ export function allowedActions(t: TicketState, actor: TicketActor): TicketAction
   return all.filter((a) => planTransition(t, a, actor, { note: "probe", edit: PROBE_EDIT }).ok);
 }
 
-/** 票頁頂端「現在輪到誰、下一步」。names 把 userId 轉成名字。 */
-export function nextStep(t: TicketState, name: (id: string | null) => string): string {
+/** 票頁頂端「現在輪到誰、下一步」。names 把 userId 轉成名字。mergedPr：這張票已合併的 PR 編號（spec「Merged PR hint」）。 */
+export function nextStep(t: TicketState, name: (id: string | null) => string, mergedPr?: number | null): string {
   switch (t.status) {
     case "open":
       return "等人認領。認領後複製開工指令貼給 Claude 開工。";
     case "in_progress":
-      return `輪到 ${name(t.ownerId)} 開發。PR 合併並部署後，回來按「交付」。`;
+      return mergedPr
+        ? `PR #${mergedPr} 已經合併。Jesse 部署後，輪到 ${name(t.ownerId)} 按「交付」。`
+        : `輪到 ${name(t.ownerId)} 開發。PR 合併並部署後，回來按「交付」。`;
     case "review":
       return t.ownerId === t.reporterId
         ? "輪到管理員驗收（回報人自己做的票由管理員驗收）。"
