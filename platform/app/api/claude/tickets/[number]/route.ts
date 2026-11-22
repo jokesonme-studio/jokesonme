@@ -3,6 +3,7 @@ import { fail, json, summarize, ticketUrl, withClaudeUser } from "@/lib/claude/h
 import { getTicketByNumber, listTicketEvents } from "@/lib/tickets/data";
 import { ACTION_LABEL, allowedActions, nextStep } from "@/lib/tickets/flow";
 import { kickoffText } from "@/lib/tickets/kickoff";
+import { mergedPrs } from "@/lib/tickets/github";
 import { listUsers, nameMap } from "@/lib/todos";
 
 // 這兩個動作只在網頁上做（design「網頁與 API 共用同一套開發票操作」）
@@ -17,12 +18,13 @@ export async function GET(request: Request, ctx: RouteContext<"/api/claude/ticke
     const [events, users] = await Promise.all([listTicketEvents(actor, t.id), listUsers(actor)]);
     const names = nameMap(users);
     const name = (id: string | null) => (id ? (names.get(id) ?? "成員") : "沒人");
+    const merged = t.status === "in_progress" ? (await mergedPrs()).get(t.number)?.number ?? null : null;
     const label: Record<string, string> = { create: "開票", ...ACTION_LABEL };
     return json({
       ticket: { ...summarize(t, name), description: t.description, createdAt: t.createdAt, url: ticketUrl(request, t.number) },
       history: events.map((e) => ({ at: e.at, who: name(e.actorId), action: label[e.action] ?? e.action, note: e.note })),
       allowedActions: allowedActions(t, u).filter((a) => !WEB_ONLY.has(a)),
-      nextStep: nextStep(t, name),
+      nextStep: nextStep(t, name, merged),
       kickoff: t.ownerId === u.id || u.role === "admin" ? kickoffText(t, name(t.reporterId)) : null,
     });
   });

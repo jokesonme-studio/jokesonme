@@ -1,5 +1,8 @@
 -- 0014 show series：演出類別（看我笑話／現代問題維修中心／專場），與 type（流程：monthly 觸發月號模板與隔天技術費）分開。
 -- nullable，讓不知道 series 的舊插入程式不會失敗。
+-- 2026-11-22（T-18）：補上操作者與 _migrations 紀錄。原本沒記，沒記錄的資料庫每次 db:migrate 都會重跑這支，
+-- 而且 shows 有資料時會因為沒有操作者被 audit 擋下。內容本來就可以重跑（if not exists、只補空值）。
+do $$ begin perform set_config('app.actor', 'migration', true); end $$;  -- db:migrate 用單一交易跑整支，這個設定會留到檔尾
 alter table shows add column if not exists series text;
 alter table shows drop constraint if exists shows_series_check;
 alter table shows add constraint shows_series_check
@@ -36,3 +39,5 @@ update shows set type = 'monthly'
 where id in ('bff98ab3-728e-4ea1-a427-3b43c2860d13', '03faa061-d8b8-4d1d-a0b8-56f0477d7d20', '73f076f6-dc64-4a2b-89d4-7b188ce889f9',
              'ca3afc0e-5f13-4e4d-991e-2bb0731200dc', 'e89ea76b-30e6-408f-b322-190905323301', '39bba6d9-9f55-463e-8f2a-a9039d31858e')
   and type = 'other';
+
+insert into _migrations (name) values ('0014_show_series') on conflict do nothing;
