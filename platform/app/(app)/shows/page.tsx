@@ -1,3 +1,6 @@
+// 最後更新：2026-11-28 19:30
+// 誰幫忙的：Claude Code（Claude Opus 5.5）
+// 修改摘要：清單最下面加「商演合作」入口（/deals），手機底部導覽沒有這一項，從這裡進。
 import Link from "next/link";
 import { requirePage } from "@/lib/auth/current";
 import { daysBetween, listPerformances, pickableShows, seriesOf, SHOW_SERIES, SHOW_TYPE_LABEL, type Show } from "@/lib/shows";
@@ -58,6 +61,10 @@ export default async function ShowsPage({ searchParams }: PageProps<"/shows">) {
             {more.map((s) => <ShowRow key={s.id} s={s} open={openCount(s.id)} notes={noteCount(s.id)} />)}
           </details>
         ) : null}
+        <Link href="/deals" className="card link-row">
+          <span className="row-main"><b>商演合作</b><span className="meta">報價原則、參考價位與過往報價紀錄</span></span>
+          <IconChevron className="chev" />
+        </Link>
       </div>
       <Link className="fab" href="/shows?new=1" aria-label="新增演出"><IconPlus /></Link>
 
